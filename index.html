@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghost Games | Minimalist Arcade</title>
+    <style>
+        /* --- MINIMALIST DESIGN SYSTEM --- */
+        :root {
+            --bg: #080808;
+            --card-bg: #121212;
+            --accent: #9d00ff; /* Ghostly Purple */
+            --text: #ffffff;
+            --text-muted: #777777;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* --- HEADER --- */
+        header {
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+        }
+
+        .logo span {
+            color: var(--accent);
+            text-shadow: 0 0 12px var(--accent);
+        }
+
+        /* --- THE GRID --- */
+        #game-container {
+            display: grid;
+            /* Responsiveness: 2 columns on mobile, up to 6 on desktop */
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            padding: 0 20px 50px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* --- GAME CARD --- */
+        .game-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s ease, border 0.2s ease;
+            border: 1px solid #1a1a1a;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-card:hover {
+            transform: scale(1.03);
+            border-color: var(--accent);
+        }
+
+        /* Square Thumbnail Wrapper */
+        .thumb-wrapper {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: #181818;
+            position: relative;
+        }
+
+        .thumb-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .game-title {
+            padding: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-align: center;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .game-card:hover .game-title {
+            color: var(--text);
+        }
+
+        /* --- MOBILE TWEAKS --- */
+        @media (max-width: 480px) {
+            #game-container {
+                grid-template-columns: repeat(2, 1fr); /* Forces 2 per row on small phones */
+                gap: 10px;
+                padding: 0 10px;
+            }
+            
+            .logo {
+                font-size: 1.3rem;
+                letter-spacing: 3px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">Ghost<span>Games</span></div>
+    </header>
+
+    <main id="game-container">
+        </main>
+
+    <script>
+        /**
+         * --- MODULAR GAME DATA ---
+         * Add your games here.
+         * name: Title shown on hover/label
+         * url:  The path to the game's html file in your repo
+         * thumb: The path to the image file in your repo
+         */
+        const MY_GAMES = [
+            {
+                name: "Retro Racer",
+                url: "./games/retro-racer/index.html",
+                thumb: "./games/retro-racer/thumb.png"
+            },
+            {
+                name: "Ghost Jump",
+                url: "./games/ghost-jump/index.html",
+                thumb: "./games/ghost-jump/preview.webp"
+            },
+            {
+                name: "Neon Void",
+                url: "./games/neon-void/main.html",
+                thumb: "./images/neon-thumb.jpg"
+            }
+            // Add more games below using the same format...
+        ];
+
+        const container = document.getElementById('game-container');
+
+        function init() {
+            // Map through the array and create the HTML strings
+            const htmlContent = MY_GAMES.map(game => `
+                <a href="${game.url}" class="game-card">
+                    <div class="thumb-wrapper">
+                        <img src="${game.thumb}" alt="${game.name}" loading="lazy">
+                    </div>
+                    <div class="game-title">${game.name}</div>
+                </a>
+            `).join('');
+
+            container.innerHTML = htmlContent;
+        }
+
+        // Run when the page is ready
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
