@@ -24,13 +24,16 @@
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         /* --- HEADER --- */
         header {
-            padding: 40px 20px;
+            padding: 20px;
             text-align: center;
         }
 
@@ -39,6 +42,7 @@
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 5px;
+            cursor: pointer;
         }
 
         .logo span {
@@ -49,12 +53,12 @@
         /* --- THE GRID --- */
         #game-container {
             display: grid;
-            /* Responsiveness: 2 columns on mobile, up to 6 on desktop */
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 15px;
             padding: 0 20px 50px 20px;
             max-width: 1200px;
             margin: 0 auto;
+            width: 100%;
         }
 
         /* --- GAME CARD --- */
@@ -62,8 +66,7 @@
             background: var(--card-bg);
             border-radius: 10px;
             overflow: hidden;
-            text-decoration: none;
-            color: inherit;
+            cursor: pointer;
             transition: transform 0.2s ease, border 0.2s ease;
             border: 1px solid #1a1a1a;
             display: flex;
@@ -75,12 +78,10 @@
             border-color: var(--accent);
         }
 
-        /* Square Thumbnail Wrapper */
         .thumb-wrapper {
             width: 100%;
             aspect-ratio: 1 / 1;
             background: #181818;
-            position: relative;
         }
 
         .thumb-wrapper img {
@@ -105,17 +106,65 @@
             color: var(--text);
         }
 
+        /* --- GAME PLAYER (IFRAME) --- */
+        #player-container {
+            display: none; /* Hidden until a game is clicked */
+            flex-direction: column;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            flex-grow: 1;
+            padding: 0 20px 20px 20px;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .back-btn {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid #333;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .now-playing {
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        iframe {
+            width: 100%;
+            height: 75vh;
+            border: none;
+            border-radius: 10px;
+            background: #000;
+        }
+
         /* --- MOBILE TWEAKS --- */
         @media (max-width: 480px) {
             #game-container {
-                grid-template-columns: repeat(2, 1fr); /* Forces 2 per row on small phones */
+                grid-template-columns: repeat(2, 1fr);
                 gap: 10px;
                 padding: 0 10px;
             }
-            
-            .logo {
-                font-size: 1.3rem;
-                letter-spacing: 3px;
+            #player-container {
+                padding: 0 10px 10px 10px;
+            }
+            iframe {
+                height: 80vh; /* Taller on mobile */
             }
         }
     </style>
@@ -123,56 +172,71 @@
 <body>
 
     <header>
-        <div class="logo">Ghost<span>Games</span></div>
+        <div class="logo" onclick="closeGame()">Ghost<span>Games</span></div>
     </header>
 
     <main id="game-container">
         </main>
 
+    <section id="player-container">
+        <div class="top-bar">
+            <button class="back-btn" onclick="closeGame()">← Back</button>
+            <div class="now-playing" id="playing-title">Game Title</div>
+        </div>
+        <iframe id="game-frame" src=""></iframe>
+    </section>
+
     <script>
         /**
          * --- MODULAR GAME DATA ---
-         * Add your games here.
-         * name: Title shown on hover/label
-         * url:  The path to the game's html file in your repo
-         * thumb: The path to the image file in your repo
          */
         const MY_GAMES = [
             {
                 name: "Arrow Archers",
-                url: "./games/Arrow Archers/arrow.html",
-                thumb: "./games/idk/thumb.png"
+                url: "./Games/Arrow Archers/arrow.html",
+                thumb: "./games/retro-racer/thumb.png"
             },
             {
                 name: "Ghost Jump",
                 url: "./games/ghost-jump/index.html",
                 thumb: "./games/ghost-jump/preview.webp"
-            },
-            {
-                name: "Neon Void",
-                url: "./games/neon-void/main.html",
-                thumb: "./images/neon-thumb.jpg"
             }
-            // Add more games below using the same format...
+            // Add more here!
         ];
 
         const container = document.getElementById('game-container');
+        const playerContainer = document.getElementById('player-container');
+        const gameFrame = document.getElementById('game-frame');
+        const playingTitle = document.getElementById('playing-title');
 
+        // 1. Load the grid
         function init() {
-            // Map through the array and create the HTML strings
-            const htmlContent = MY_GAMES.map(game => `
-                <a href="${game.url}" class="game-card">
+            container.innerHTML = MY_GAMES.map(game => `
+                <div class="game-card" onclick="openGame('${game.url}', '${game.name}')">
                     <div class="thumb-wrapper">
                         <img src="${game.thumb}" alt="${game.name}" loading="lazy">
                     </div>
                     <div class="game-title">${game.name}</div>
-                </a>
+                </div>
             `).join('');
-
-            container.innerHTML = htmlContent;
         }
 
-        // Run when the page is ready
+        // 2. Open the game inside the iframe
+        function openGame(gameUrl, gameName) {
+            container.style.display = 'none';          // Hide grid
+            playerContainer.style.display = 'flex';    // Show player
+            playingTitle.innerText = gameName;         // Set title
+            gameFrame.src = gameUrl;                   // Load game into iframe
+        }
+
+        // 3. Close the game and go back to menu
+        function closeGame() {
+            gameFrame.src = "";                        // Stop the game from running in background
+            playerContainer.style.display = 'none';    // Hide player
+            container.style.display = 'grid';          // Show grid
+        }
+
+        // Run when ready
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
