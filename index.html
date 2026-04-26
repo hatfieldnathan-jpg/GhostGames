@@ -108,7 +108,7 @@
 
         /* --- GAME PLAYER (IFRAME) --- */
         #player-container {
-            display: none; /* Hidden until a game is clicked */
+            display: none;
             flex-direction: column;
             width: 100%;
             max-width: 1200px;
@@ -164,7 +164,7 @@
                 padding: 0 10px 10px 10px;
             }
             iframe {
-                height: 80vh; /* Taller on mobile */
+                height: 80vh;
             }
         }
     </style>
@@ -189,19 +189,27 @@
     <script>
         /**
          * --- MODULAR GAME DATA ---
+         * folder    → subfolder inside "Games/" (required)
+         * main      → main HTML file (optional, default "index.html")
+         * thumbnail → preview image (optional, default "thumbnail.webp")
          */
         const MY_GAMES = [
             {
-                name: "Arrow Archers",
-                url: "./Games/Arrow Archers/arrow.html",
-                thumb: "./Games/Arrow Archers/IMG_3142.webp"
+                name: "Ragdoll Archers",
+                folder: "Arrow Archers",
+                main: "arrow.html",           // different from default
+                thumbnail: "IMG_3142.webp"    // custom thumbnail name
             },
             {
-                name: "Ghost Jump",
-                url: "./games/ghost-jump/index.html",
-                thumb: "./games/ghost-jump/preview.webp"
+                name: "Stickman Hook",
+                folder: "Stickman Hook"
+                // main → stick.html (auto)
+                // thumbnail → thumbnail.webp (auto)
             }
-            // Add more here!
+
+            // ADD NEW GAMES LIKE THIS:
+            // { name: "Game Name", folder: "folder-name" }
+            // (Just drop folder inside Games/ with index.html + thumbnail.webp)
         ];
 
         const container = document.getElementById('game-container');
@@ -209,34 +217,42 @@
         const gameFrame = document.getElementById('game-frame');
         const playingTitle = document.getElementById('playing-title');
 
-        // 1. Load the grid
+        // 1. Build the grid from modular data
         function init() {
-            container.innerHTML = MY_GAMES.map(game => `
-                <div class="game-card" onclick="openGame('${game.url}', '${game.name}')">
-                    <div class="thumb-wrapper">
-                        <img src="${game.thumb}" alt="${game.name}" loading="lazy">
+            container.innerHTML = MY_GAMES.map(game => {
+                const folder = game.folder;
+                const mainFile = game.main || 'index.html';
+                const thumbFile = game.thumbnail || 'thumbnail.webp';
+
+                const gameUrl = `./Games/${folder}/${mainFile}`;
+                const thumbUrl = `./Games/${folder}/${thumbFile}`;
+
+                return `
+                    <div class="game-card" onclick="openGame('${gameUrl}', '${game.name}')">
+                        <div class="thumb-wrapper">
+                            <img src="${thumbUrl}" alt="${game.name}" loading="lazy">
+                        </div>
+                        <div class="game-title">${game.name}</div>
                     </div>
-                    <div class="game-title">${game.name}</div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
-        // 2. Open the game inside the iframe
+        // 2. Open the selected game in the iframe
         function openGame(gameUrl, gameName) {
-            container.style.display = 'none';          // Hide grid
-            playerContainer.style.display = 'flex';    // Show player
-            playingTitle.innerText = gameName;         // Set title
-            gameFrame.src = gameUrl;                   // Load game into iframe
+            container.style.display = 'none';
+            playerContainer.style.display = 'flex';
+            playingTitle.innerText = gameName;
+            gameFrame.src = gameUrl;
         }
 
-        // 3. Close the game and go back to menu
+        // 3. Close the current game and return to the grid
         function closeGame() {
-            gameFrame.src = "";                        // Stop the game from running in background
-            playerContainer.style.display = 'none';    // Hide player
-            container.style.display = 'grid';          // Show grid
+            gameFrame.src = "";
+            playerContainer.style.display = 'none';
+            container.style.display = 'grid';
         }
 
-        // Run when ready
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
